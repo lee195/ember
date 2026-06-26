@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+src-tauri/target/
+
+# Build artifacts
+dist/
+src-tauri/target/release/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+
+# Editor
+.idea/
+*.swp
+*.swo
+*~
+
+# Tauri
+src-tauri/fixins/
+src-tauri/gen/
+src-tauri/icons/
+
+# Debug
+*.log

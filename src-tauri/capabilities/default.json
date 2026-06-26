@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Core permissions plus the folder picker used for profile export/import.",
+  "windows": ["main"],
+  "permissions": ["core:default", "dialog:allow-open"]
+}
