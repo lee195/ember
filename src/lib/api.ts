@@ -171,6 +171,39 @@ export async function pickFolder(title: string): Promise<string | null> {
   return typeof res === "string" ? res : null;
 }
 
+// ---------- Narrative (provider-agnostic, local-first LLM) ----------
+
+export interface LlmSettings {
+  base_url: string;
+  model: string;
+  has_api_key: boolean;
+}
+
+export function getLlmSettings(): Promise<LlmSettings> {
+  return invoke<LlmSettings>("get_llm_settings");
+}
+
+/** Save provider config. Pass apiKey to set/clear the Keychain key; omit to leave it. */
+export function setLlmSettings(
+  baseUrl: string,
+  model: string,
+  apiKey?: string,
+): Promise<void> {
+  return invoke("set_llm_settings", {
+    baseUrl,
+    model,
+    apiKey: apiKey ?? null,
+  });
+}
+
+export function generateNarrative(): Promise<string> {
+  return invoke<string>("generate_narrative");
+}
+
+export function getCachedNarrative(): Promise<string | null> {
+  return invoke<string | null>("get_cached_narrative");
+}
+
 export function formatPercent(ratio: number): string {
   return Math.round(ratio * 100) + "%";
 }

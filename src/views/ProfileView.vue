@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard.vue";
 import RankedList from "../components/RankedList.vue";
 import ArchetypeHeader from "../components/ArchetypeHeader.vue";
 import TraitCard from "../components/TraitCard.vue";
+import NarrativePanel from "../components/NarrativePanel.vue";
 
 const data = ref<StyleProfile | null>(null);
 const loading = ref(true);
@@ -88,6 +89,15 @@ const toolRows = computed(() =>
       <div class="traits">
         <TraitCard v-for="t in data.traits" :key="t.key" :trait="t" />
       </div>
+
+      <Section
+        title="Narrative"
+        hint="LLM-written, your model of choice"
+        collapsible
+        :default-open="false"
+      >
+        <NarrativePanel />
+      </Section>
 
       <Section title="Communication style" hint="local heuristics over your prompts">
         <div class="comm-grid">
