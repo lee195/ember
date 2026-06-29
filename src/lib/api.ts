@@ -204,6 +204,75 @@ export function getCachedNarrative(): Promise<string | null> {
   return invoke<string | null>("get_cached_narrative");
 }
 
+// ---------- Profile management (CLAUDE_CONFIG_DIR profiles) ----------
+
+export interface ProfileMeta {
+  id: string;
+  name: string;
+  created_at: string;
+  config_dir: string;
+}
+
+export interface PluginToggle {
+  name: string;
+  enabled: boolean;
+}
+
+export interface ProfileConfig {
+  model: string | null;
+  default_mode: string | null;
+  claude_md: string;
+  enabled_plugins: PluginToggle[];
+  skills: string[];
+}
+
+export type CreateSource =
+  | { kind: "blank" }
+  | { kind: "clone"; id: string }
+  | { kind: "importBundle"; path: string };
+
+export function listProfiles(): Promise<ProfileMeta[]> {
+  return invoke<ProfileMeta[]>("list_profiles");
+}
+
+export function createProfile(
+  name: string,
+  source: CreateSource,
+): Promise<ProfileMeta> {
+  return invoke<ProfileMeta>("create_profile", { name, source });
+}
+
+export function renameProfile(id: string, name: string): Promise<void> {
+  return invoke("rename_profile", { id, name });
+}
+
+export function deleteProfile(id: string): Promise<void> {
+  return invoke("delete_profile", { id });
+}
+
+export function getProfileConfig(id: string): Promise<ProfileConfig> {
+  return invoke<ProfileConfig>("get_profile_config", { id });
+}
+
+export function setProfileConfig(
+  id: string,
+  config: ProfileConfig,
+): Promise<void> {
+  return invoke("set_profile_config", { id, config });
+}
+
+export function profileLaunchCommand(id: string): Promise<string> {
+  return invoke<string>("profile_launch_command", { id });
+}
+
+export function launchProfiles(ids: string[]): Promise<void> {
+  return invoke("launch_profiles", { ids });
+}
+
+export function openProfileFolder(id: string): Promise<void> {
+  return invoke("open_profile_folder", { id });
+}
+
 export function formatPercent(ratio: number): string {
   return Math.round(ratio * 100) + "%";
 }

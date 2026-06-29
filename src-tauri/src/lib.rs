@@ -2,6 +2,7 @@ mod claude_data;
 mod narrative;
 mod portable;
 mod profile;
+mod profiles;
 
 use claude_data::Overview;
 use portable::{ExportResult, ImportPlan};
@@ -20,7 +21,16 @@ pub fn run() {
             narrative::get_llm_settings,
             narrative::set_llm_settings,
             narrative::get_cached_narrative,
-            narrative::generate_narrative
+            narrative::generate_narrative,
+            profiles::list_profiles,
+            profiles::create_profile,
+            profiles::rename_profile,
+            profiles::delete_profile,
+            profiles::get_profile_config,
+            profiles::set_profile_config,
+            profiles::profile_launch_command,
+            profiles::launch_profiles,
+            profiles::open_profile_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running Tauri process");

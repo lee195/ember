@@ -3,8 +3,9 @@ import { ref } from "vue";
 import DashboardView from "./views/DashboardView.vue";
 import ProfileView from "./views/ProfileView.vue";
 import PortableView from "./views/PortableView.vue";
+import ProfilesView from "./views/ProfilesView.vue";
 
-type Tab = "dashboard" | "profile" | "portable";
+type Tab = "dashboard" | "profile" | "portable" | "profiles";
 const tab = ref<Tab>("dashboard");
 </script>
 
@@ -28,12 +29,16 @@ const tab = ref<Tab>("dashboard");
         <button :class="{ active: tab === 'portable' }" @click="tab = 'portable'">
           Portable
         </button>
+        <button :class="{ active: tab === 'profiles' }" @click="tab = 'profiles'">
+          Profiles
+        </button>
       </nav>
     </header>
 
     <DashboardView v-if="tab === 'dashboard'" />
     <ProfileView v-else-if="tab === 'profile'" />
-    <PortableView v-else />
+    <PortableView v-else-if="tab === 'portable'" />
+    <ProfilesView v-else />
   </main>
 </template>
 

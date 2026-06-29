@@ -34,7 +34,7 @@ fn claude_home() -> Result<PathBuf, String> {
 }
 
 /// Copy a file or directory tree from `src` to `dest`.
-fn copy_tree(src: &Path, dest: &Path) -> std::io::Result<()> {
+pub(crate) fn copy_tree(src: &Path, dest: &Path) -> std::io::Result<()> {
     let meta = std::fs::metadata(src)?;
     if meta.is_dir() {
         std::fs::create_dir_all(dest)?;
@@ -82,7 +82,7 @@ fn style_markdown(p: &StyleProfile) -> String {
 
 /// Assets copied into / out of a bundle (relative to `~/.claude`). Credentials
 /// (`.claude.json`) are deliberately excluded.
-const ASSETS: [&str; 3] = ["skills", "settings.json", "CLAUDE.md"];
+pub(crate) const ASSETS: [&str; 3] = ["skills", "settings.json", "CLAUDE.md"];
 
 /// Write a portable profile bundle to `dest_dir`.
 pub fn export_profile(dest_dir: String) -> Result<ExportResult, String> {
