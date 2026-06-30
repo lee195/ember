@@ -1,0 +1,27 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ember">
+  <!-- Flame with carved-out ascending bars: ember + usage analytics. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20222a"/>
+      <stop offset="1" stop-color="#141519"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="64%" r="44%">
+      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd56b"/>
+      <stop offset="0.5" stop-color="#ff7a45"/>
+      <stop offset="1" stop-color="#e23b2e"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#bg)"/>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#glow)"/>
+  <path d="M256 104 C320 188 352 248 320 320 C300 366 262 386 256 392 C250 386 212 366 192 320 C160 248 192 188 256 104 Z" fill="url(#flame)"/>
+  <!-- bars carved out in the background colour, ascending left to right -->
+  <g fill="#141519">
+    <rect x="206" y="296" width="26" height="76" rx="9"/>
+    <rect x="243" y="262" width="26" height="110" rx="9"/>
+    <rect x="280" y="232" width="26" height="140" rx="9"/>
+  </g>
+</svg>

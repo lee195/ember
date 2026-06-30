@@ -11,16 +11,17 @@ src-tauri/target/release/
 .env
 .env.local
 
-# Editor
+# Editor / OS
 .idea/
 *.swp
 *.swo
 *~
+.DS_Store
 
 # Tauri
 src-tauri/fixins/
 src-tauri/gen/
-src-tauri/icons/
+# src-tauri/icons/ is committed — it's the locked-in app icon (see design/icons/ICON.md)
 
 # Debug
 *.log

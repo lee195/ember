@@ -1,0 +1,25 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ember">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20222a"/>
+      <stop offset="1" stop-color="#141519"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="64%" r="44%">
+      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd56b"/>
+      <stop offset="0.5" stop-color="#ff7a45"/>
+      <stop offset="1" stop-color="#e23b2e"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3cf"/>
+      <stop offset="1" stop-color="#ffb14a"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#bg)"/>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#glow)"/>
+  <path d="M256 104 C320 188 352 248 320 320 C300 366 262 386 256 392 C250 386 212 366 192 320 C160 248 192 188 256 104 Z" fill="url(#flame)"/>
+  <path d="M256 196 C292 244 306 280 286 318 C274 342 258 350 256 352 C254 350 238 342 226 318 C206 280 220 244 256 196 Z" fill="url(#core)"/>
+</svg>

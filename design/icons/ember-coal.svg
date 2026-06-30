@@ -1,0 +1,29 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ember">
+  <!-- Minimal glowing ember/coal with rising sparks. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20222a"/>
+      <stop offset="1" stop-color="#141519"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="56%" r="50%">
+      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coal" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#fff3cf"/>
+      <stop offset="0.45" stop-color="#ffb14a"/>
+      <stop offset="0.8" stop-color="#ff6a32"/>
+      <stop offset="1" stop-color="#c8301f"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#bg)"/>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#halo)"/>
+  <!-- ember coal: a soft squircle -->
+  <rect x="156" y="186" width="200" height="200" rx="84" fill="url(#coal)"/>
+  <!-- rising sparks -->
+  <g fill="#ffd16b">
+    <circle cx="316" cy="150" r="11" opacity="0.95"/>
+    <circle cx="214" cy="132" r="7" opacity="0.8"/>
+    <circle cx="350" cy="196" r="5" opacity="0.7"/>
+  </g>
+</svg>

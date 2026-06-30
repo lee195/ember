@@ -1,0 +1,42 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ember mascot">
+  <defs>
+    <linearGradient id="space" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d2038"/><stop offset="1" stop-color="#0c0d15"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="54%" r="52%">
+      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.45"/><stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coal" cx="50%" cy="40%" r="64%">
+      <stop offset="0" stop-color="#fff3cf"/><stop offset="0.42" stop-color="#ffb14a"/>
+      <stop offset="0.78" stop-color="#ff6a32"/><stop offset="1" stop-color="#c8301f"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#space)"/>
+  <g fill="#dfe4ff">
+    <circle cx="92" cy="118" r="3"/><circle cx="150" cy="86" r="2"/><circle cx="78" cy="250" r="2"/>
+    <circle cx="120" cy="420" r="2"/><circle cx="412" cy="430" r="3"/><circle cx="256" cy="62" r="2"/>
+  </g>
+
+  <!-- orbit + crescent moon -->
+  <g transform="rotate(-18 256 278)">
+    <ellipse cx="256" cy="278" rx="170" ry="66" fill="none" stroke="#7e8ff0" stroke-opacity="0.5" stroke-width="4"/>
+  </g>
+  <path d="M392 130 A22 22 0 1 0 392 174 A15 22 0 1 1 392 130 Z" fill="#eef1ff"/>
+
+  <!-- zzz -->
+  <g fill="none" stroke="#cfe0ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+    <path d="M300 196 h14 l-14 14 h14"/>
+    <path d="M322 166 h18 l-18 18 h18"/>
+  </g>
+
+  <circle cx="256" cy="276" r="150" fill="url(#halo)"/>
+  <rect x="150" y="170" width="212" height="212" rx="94" fill="url(#coal)"/>
+
+  <!-- sleepy closed eyes + soft smile -->
+  <g fill="none" stroke="#3a1206" stroke-width="8" stroke-linecap="round">
+    <path d="M212 258 Q226 272 240 258"/>
+    <path d="M272 258 Q286 272 300 258"/>
+  </g>
+  <g fill="#ff5630" opacity="0.4"><circle cx="202" cy="296" r="12"/><circle cx="310" cy="296" r="12"/></g>
+  <path d="M228 302 Q256 320 284 302" fill="none" stroke="#3a1206" stroke-width="9" stroke-linecap="round"/>
+</svg>

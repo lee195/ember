@@ -1,0 +1,41 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ember mascot">
+  <defs>
+    <linearGradient id="space" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d2038"/><stop offset="1" stop-color="#0c0d15"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="54%" r="52%">
+      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.5"/><stop offset="1" stop-color="#ff7a45" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coal" cx="50%" cy="40%" r="64%">
+      <stop offset="0" stop-color="#fff3cf"/><stop offset="0.42" stop-color="#ffb14a"/>
+      <stop offset="0.78" stop-color="#ff6a32"/><stop offset="1" stop-color="#c8301f"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#space)"/>
+  <g fill="#dfe4ff">
+    <circle cx="92" cy="118" r="3"/><circle cx="150" cy="86" r="2"/><circle cx="430" cy="150" r="3"/>
+    <circle cx="78" cy="250" r="2"/><circle cx="412" cy="430" r="3"/><circle cx="120" cy="420" r="2"/><circle cx="256" cy="62" r="2"/>
+  </g>
+  <g fill="#ffd16b">
+    <path d="M118 150 C122 159 122 159 131 163 C122 167 122 167 118 176 C114 167 114 167 105 163 C114 159 114 159 118 150 Z"/>
+    <path d="M404 356 C407 363 407 363 414 366 C407 369 407 369 404 376 C401 369 401 369 394 366 C401 363 401 363 404 356 Z"/>
+  </g>
+
+  <!-- back ring -->
+  <g transform="rotate(-16 256 300)">
+    <ellipse cx="256" cy="300" rx="186" ry="54" fill="none" stroke="#9fb0ff" stroke-opacity="0.8" stroke-width="12"/>
+  </g>
+
+  <circle cx="256" cy="276" r="150" fill="url(#halo)"/>
+  <rect x="150" y="170" width="212" height="212" rx="94" fill="url(#coal)"/>
+
+  <g fill="#3a1206"><ellipse cx="226" cy="262" rx="13" ry="18"/><ellipse cx="286" cy="262" rx="13" ry="18"/></g>
+  <g fill="#fff7e6"><circle cx="221" cy="255" r="4.5"/><circle cx="281" cy="255" r="4.5"/></g>
+  <g fill="#ff5630" opacity="0.4"><circle cx="202" cy="294" r="12"/><circle cx="310" cy="294" r="12"/></g>
+  <path d="M222 300 Q256 328 290 300" fill="none" stroke="#3a1206" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- front ring arc -->
+  <g transform="rotate(-16 256 300)">
+    <path d="M70 300 A186 54 0 0 1 442 300" fill="none" stroke="#bcc8ff" stroke-opacity="0.95" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>
