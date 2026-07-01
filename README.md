@@ -10,6 +10,19 @@ you package that profile to carry between machines, and lets you manage and run
 multiple Claude Code configurations side-by-side. Everything runs on-device by
 default — nothing is uploaded.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard" /><br/><sub><b>Dashboard</b> — usage insights</sub></td>
+    <td width="50%"><img src="docs/screenshots/profile.png" alt="Profile" /><br/><sub><b>Profile</b> — style + narrative</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/portable.png" alt="Portable" /><br/><sub><b>Portable</b> — export / import</sub></td>
+    <td width="50%"><img src="docs/screenshots/profiles.png" alt="Profiles" /><br/><sub><b>Profiles</b> — configs &amp; side-by-side</sub></td>
+  </tr>
+</table>
+
 ## Features
 
 - **Dashboard** — usage insights from your session transcripts: tokens (input/
