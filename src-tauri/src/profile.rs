@@ -175,6 +175,16 @@ fn ext_to_language(ext: &str) -> Option<&'static str> {
         "css" | "scss" | "sass" => "CSS",
         "html" => "HTML",
         "json" | "toml" | "yaml" | "yml" => "Config",
+        // beyond code — data, infra, writing, research
+        "ipynb" => "Jupyter",
+        "tf" | "hcl" => "Terraform",
+        "tex" | "bib" => "LaTeX",
+        "r" | "rmd" => "R",
+        "csv" | "tsv" | "parquet" => "Data",
+        "graphql" | "gql" => "GraphQL",
+        "proto" => "Protobuf",
+        "xml" => "XML",
+        "txt" | "rst" | "org" => "Text",
         _ => return None,
     })
 }
@@ -294,7 +304,7 @@ fn derive_profile(
     // Primary = top non-doc, non-config language if available.
     let primary = languages
         .iter()
-        .find(|l| l.language != "Markdown" && l.language != "Config")
+        .find(|l| !matches!(l.language.as_str(), "Markdown" | "Config" | "Data" | "Text"))
         .or_else(|| languages.first())
         .map(|l| l.language.clone());
     let stack = Stack {

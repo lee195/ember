@@ -7,6 +7,9 @@ dist/
 src-tauri/target/release/
 *.tsbuildinfo
 
+# Generated synthetic demo data (see scripts/gen_demo_data.py)
+demo-data/
+
 # Environment
 .env
 .env.local
