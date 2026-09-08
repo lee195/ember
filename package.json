@@ -2,6 +2,9 @@
   "name": "ember",
   "version": "0.1.0",
   "private": true,
+  "author": "Jisu Lee",
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "Local-first macOS app for Claude Code usage insights, a portable profile, and multiple side-by-side configs",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -13,9 +13,14 @@ demo-data/
 # Environment
 .env
 .env.local
+.env.*
+*.pem
+*.key
+*.p12
 
 # Editor / OS
 .idea/
+.claude/
 *.swp
 *.swo
 *~
