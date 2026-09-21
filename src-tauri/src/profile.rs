@@ -231,9 +231,13 @@ fn derive_profile(
         auto: *pm.get("auto").unwrap_or(&0),
         default: *pm.get("default").unwrap_or(&0),
         accept_edits: *pm.get("acceptEdits").unwrap_or(&0),
+        // Ties must break deterministically: iteration order over a HashMap is
+        // arbitrary, so `max_by_key` alone can flip the archetype title between
+        // runs on identical data. Highest count wins; equal counts fall back to
+        // the alphabetically first mode name.
         dominant: pm
             .iter()
-            .max_by_key(|(_, v)| **v)
+            .max_by(|(k1, v1), (k2, v2)| v1.cmp(v2).then_with(|| k2.cmp(k1)))
             .map(|(k, _)| k.clone())
             .unwrap_or_else(|| "unknown".into()),
     };
@@ -396,7 +400,9 @@ fn derive_profile(
 
     // Time of day
     let peak = peak_hours.first().copied().unwrap_or(0);
-    let time_verdict = if (20..24).contains(&peak) || peak < 6 {
+    // `peak < 5`, not `< 6`: at `< 6` this branch swallowed hour 5 and the
+    // early-bird range below could never match it.
+    let time_verdict = if (20..24).contains(&peak) || peak < 5 {
         "Night owl"
     } else if (5..11).contains(&peak) {
         "Early bird"
@@ -580,6 +586,176 @@ fn build_summary(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ---------- unit tests over the pure classifier ----------
+    //
+    // `derive_profile` is a pure function of (Scan, ClaudeJsonMeta), so the
+    // threshold rules can be tested without touching the filesystem. Note that
+    // `Scan::default()` alone is NOT usable here: `hourly`/`weekday` default to
+    // empty vecs and `derive_profile` indexes them directly.
+
+    fn scan() -> Scan {
+        Scan {
+            hourly: vec![0; 24],
+            weekday: vec![0; 7],
+            ..Default::default()
+        }
+    }
+
+    fn profile_of(s: &Scan) -> StyleProfile {
+        derive_profile("/tmp/test".into(), true, s, &ClaudeJsonMeta::default())
+    }
+
+    fn verdict(p: &StyleProfile, key: &str) -> String {
+        p.traits
+            .iter()
+            .find(|t| t.key == key)
+            .map(|t| t.value.clone())
+            .unwrap_or_else(|| panic!("no trait with key {key}"))
+    }
+
+    /// Build a session whose consecutive gaps sum to `minutes` of active time.
+    fn session_of(s: &mut Scan, id: &str, minutes: i64) {
+        let t0 = DateTime::from_timestamp(1_700_000_000, 0).unwrap();
+        // One gap under the 30-minute idle threshold per 10 minutes wanted.
+        let mut times = vec![t0];
+        let mut acc = 0;
+        while acc < minutes {
+            let step = std::cmp::min(10, minutes - acc);
+            acc += step;
+            times.push(t0 + chrono::Duration::minutes(acc));
+        }
+        s.session_times.insert(id.into(), times);
+        s.totals.sessions += 1;
+        s.days.insert(format!("day-{id}"), Default::default());
+    }
+
+    #[test]
+    fn autonomy_thresholds() {
+        let mut s = scan();
+        s.permission_modes.insert("auto".into(), 60);
+        s.permission_modes.insert("default".into(), 40);
+        assert_eq!(verdict(&profile_of(&s), "autonomy"), "Hands-off operator");
+
+        let mut s = scan();
+        s.permission_modes.insert("plan".into(), 30);
+        s.permission_modes.insert("default".into(), 70);
+        assert_eq!(verdict(&profile_of(&s), "autonomy"), "Deliberate planner");
+
+        let mut s = scan();
+        s.permission_modes.insert("plan".into(), 10);
+        s.permission_modes.insert("default".into(), 90);
+        assert_eq!(verdict(&profile_of(&s), "autonomy"), "Balanced driver");
+    }
+
+    #[test]
+    fn dominant_mode_is_deterministic_on_ties() {
+        // Regression: `max_by_key` over a HashMap picked an arbitrary winner on
+        // equal counts, so the archetype title could change between runs.
+        let mut first: Option<String> = None;
+        for _ in 0..40 {
+            let mut s = scan();
+            s.permission_modes.insert("auto".into(), 50);
+            s.permission_modes.insert("plan".into(), 50);
+            s.permission_modes.insert("default".into(), 50);
+            let got = profile_of(&s).autonomy.dominant;
+            match &first {
+                None => first = Some(got),
+                Some(f) => assert_eq!(f, &got, "dominant mode flipped between runs"),
+            }
+        }
+        // Alphabetically first among the tied modes.
+        assert_eq!(first.unwrap(), "auto");
+    }
+
+    #[test]
+    fn time_of_day_buckets() {
+        for (hour, want) in [
+            (22, "Night owl"),
+            (3, "Night owl"),
+            (4, "Night owl"),
+            // Regression: hour 5 was swallowed by `peak < 6` and could never
+            // reach the early-bird range.
+            (5, "Early bird"),
+            (9, "Early bird"),
+            (14, "Daytime worker"),
+            (19, "Daytime worker"),
+        ] {
+            let mut s = scan();
+            s.hourly[hour] = 100;
+            assert_eq!(
+                verdict(&profile_of(&s), "time"),
+                want,
+                "peak hour {hour} misclassified"
+            );
+        }
+    }
+
+    #[test]
+    fn session_length_buckets() {
+        for (minutes, want) in [(10, "Sprinter"), (30, "Steady worker"), (60, "Marathoner")] {
+            let mut s = scan();
+            session_of(&mut s, "a", minutes);
+            assert_eq!(
+                verdict(&profile_of(&s), "session"),
+                want,
+                "{minutes} active minutes misclassified"
+            );
+        }
+    }
+
+    #[test]
+    fn communication_buckets() {
+        for (prompts, words, want) in [
+            (10u64, 80u64, "Terse commander"),   // 8.0 words
+            (10, 200, "Conversational"),         // 20.0 words
+            (10, 400, "Detailed director"),      // 40.0 words
+        ] {
+            let mut s = scan();
+            s.prompt.prompts = prompts;
+            s.prompt.total_words = words;
+            assert_eq!(
+                verdict(&profile_of(&s), "communication"),
+                want,
+                "{} avg words misclassified",
+                words as f64 / prompts as f64
+            );
+        }
+    }
+
+    #[test]
+    fn tooling_mode_compares_edits_to_reads() {
+        let mut s = scan();
+        s.tools.insert("Edit".into(), 10);
+        s.tools.insert("Read".into(), 3);
+        assert_eq!(verdict(&profile_of(&s), "tooling"), "Builder");
+
+        let mut s = scan();
+        s.tools.insert("Write".into(), 2);
+        s.tools.insert("Grep".into(), 9);
+        assert_eq!(verdict(&profile_of(&s), "tooling"), "Explorer");
+    }
+
+    #[test]
+    fn primary_stack_skips_non_code_languages() {
+        let mut s = scan();
+        s.file_exts.insert("md".into(), 100);
+        s.file_exts.insert("json".into(), 50);
+        s.file_exts.insert("rs".into(), 10);
+        // Markdown and Config are excluded, so Rust is primary despite ranking last.
+        assert_eq!(s.file_exts.len(), 3);
+        assert_eq!(verdict(&profile_of(&s), "stack"), "Rust");
+    }
+
+    #[test]
+    fn primary_stack_falls_back_when_all_excluded() {
+        let mut s = scan();
+        s.file_exts.insert("md".into(), 100);
+        s.file_exts.insert("txt".into(), 20);
+        // Nothing qualifies, so the overall top language wins.
+        assert_eq!(verdict(&profile_of(&s), "stack"), "Markdown");
+    }
+
 
     #[test]
     fn profile_against_real_data() {
