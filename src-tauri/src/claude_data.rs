@@ -184,6 +184,11 @@ pub struct PromptStats {
     pub polite: u64,          // please / thanks / could you ...
     pub specific: u64,        // references code: backticks, paths, filenames
     pub unique_words: HashSet<String>,
+    /// Per-prompt word counts, kept so the profile can use a median.
+    /// The mean is dominated by a handful of pasted logs and stack traces —
+    /// on real data the mean is ~20x the median — so it describes paste volume
+    /// rather than how someone writes. Numbers only; no text is retained.
+    pub word_counts: Vec<u32>,
 }
 
 impl PromptStats {
@@ -197,6 +202,7 @@ impl PromptStats {
         let words: Vec<&str> = t.split_whitespace().collect();
         let wc = words.len() as u64;
         self.total_words += wc;
+        self.word_counts.push(wc as u32);
         if t.contains('?') {
             self.questions += 1;
         }

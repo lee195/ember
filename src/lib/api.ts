@@ -85,6 +85,7 @@ export interface Rhythm {
   peak_hours: number[];
   busiest_weekday: string;
   avg_session_minutes: number;
+  median_session_minutes: number;
   sessions_per_active_day: number;
   active_days: number;
 }
@@ -108,6 +109,7 @@ export interface NamedUsage {
 export interface Communication {
   prompts: number;
   avg_prompt_words: number;
+  median_prompt_words: number;
   question_ratio: number;
   short_command_ratio: number;
   politeness_ratio: number;

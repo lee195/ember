@@ -102,9 +102,9 @@ const toolRows = computed(() =>
       <Section title="Communication style" hint="local heuristics over your prompts">
         <div class="comm-grid">
           <StatCard
-            label="Avg prompt length"
-            :value="data.communication.avg_prompt_words.toFixed(0)"
-            sub="words"
+            label="Typical prompt"
+            :value="data.communication.median_prompt_words.toFixed(0)"
+            sub="words (median)"
           />
           <StatCard
             label="Quick commands"

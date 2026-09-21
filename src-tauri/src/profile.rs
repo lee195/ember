@@ -98,6 +98,9 @@ pub struct Rhythm {
     pub peak_hours: Vec<usize>,
     pub busiest_weekday: String,
     pub avg_session_minutes: f64,
+    /// Typical session. Classification uses this, not the mean: session length
+    /// is heavy-tailed (one long day drags the mean far above normal).
+    pub median_session_minutes: f64,
     pub sessions_per_active_day: f64,
     pub active_days: u64,
 }
@@ -125,6 +128,9 @@ pub struct NamedUsage {
 pub struct Communication {
     pub prompts: u64,
     pub avg_prompt_words: f64,
+    /// Typical prompt. Classification uses this, not the mean: a few pasted
+    /// logs carry most of the words and say nothing about writing style.
+    pub median_prompt_words: f64,
     pub question_ratio: f64,
     pub short_command_ratio: f64,
     pub politeness_ratio: f64,
@@ -187,6 +193,21 @@ fn ext_to_language(ext: &str) -> Option<&'static str> {
         "txt" | "rst" | "org" => "Text",
         _ => return None,
     })
+}
+
+/// Median of an unsorted slice; 0.0 when empty. Even counts average the
+/// middle pair.
+fn median(values: &mut [f64]) -> f64 {
+    if values.is_empty() {
+        return 0.0;
+    }
+    values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let mid = values.len() / 2;
+    if values.len() % 2 == 0 {
+        (values[mid - 1] + values[mid]) / 2.0
+    } else {
+        values[mid]
+    }
 }
 
 fn ratio(n: u64, d: u64) -> f64 {
@@ -263,6 +284,7 @@ fn derive_profile(
     const IDLE_MINUTES: f64 = 30.0;
     let mut total_minutes = 0.0;
     let mut counted = 0u64;
+    let mut session_actives: Vec<f64> = Vec::new();
     for times in scan.session_times.values() {
         let mut ts: Vec<DateTime<Utc>> = times.clone();
         ts.sort();
@@ -275,17 +297,20 @@ fn derive_profile(
         }
         total_minutes += active;
         counted += 1;
+        session_actives.push(active);
     }
     let avg_session_minutes = if counted > 0 {
         total_minutes / counted as f64
     } else {
         0.0
     };
+    let median_session_minutes = median(&mut session_actives);
     let active_days = scan.days.len() as u64;
     let rhythm = Rhythm {
         peak_hours: peak_hours.clone(),
         busiest_weekday: busiest_weekday.clone(),
         avg_session_minutes,
+        median_session_minutes,
         sessions_per_active_day: ratio(scan.totals.sessions, active_days),
         active_days,
     };
@@ -321,6 +346,10 @@ fn derive_profile(
     let communication = Communication {
         prompts: p.prompts,
         avg_prompt_words: ratio(p.total_words, p.prompts),
+        median_prompt_words: {
+            let mut wc: Vec<f64> = p.word_counts.iter().map(|w| *w as f64).collect();
+            median(&mut wc)
+        },
         question_ratio: ratio(p.questions, p.prompts),
         short_command_ratio: ratio(p.short_commands, p.prompts),
         politeness_ratio: ratio(p.polite, p.prompts),
@@ -427,10 +456,12 @@ fn derive_profile(
         ),
     });
 
-    // Session length
-    let session_verdict = if avg_session_minutes >= 45.0 {
+    // Session length. Classified on the median: session length is heavy-tailed
+    // (real data: mean 152 min vs median 26), so the mean puts almost everyone
+    // in "Marathoner" and the trait stops discriminating.
+    let session_verdict = if median_session_minutes >= 45.0 {
         "Marathoner"
-    } else if avg_session_minutes < 15.0 {
+    } else if median_session_minutes < 15.0 {
         "Sprinter"
     } else {
         "Steady worker"
@@ -439,17 +470,22 @@ fn derive_profile(
         key: "session".into(),
         title: "Session length".into(),
         value: session_verdict.into(),
-        detail: format!("Sessions average {:.0} minutes.", avg_session_minutes),
+        detail: format!(
+            "A typical session runs {:.0} minutes (average {:.0}).",
+            median_session_minutes, avg_session_minutes
+        ),
         evidence: format!(
             "{} sessions · {:.1}/active day",
             scan.totals.sessions, rhythm.sessions_per_active_day
         ),
     });
 
-    // Communication
-    let comm_verdict = if communication.avg_prompt_words < 12.0 {
+    // Communication. Classified on the median: a handful of pasted logs and
+    // stack traces carry most of the words (real data: top 5% of prompts hold
+    // 86% of them), so the mean measures paste volume, not writing style.
+    let comm_verdict = if communication.median_prompt_words < 12.0 {
         "Terse commander"
-    } else if communication.avg_prompt_words > 35.0 {
+    } else if communication.median_prompt_words > 35.0 {
         "Detailed director"
     } else {
         "Conversational"
@@ -459,7 +495,8 @@ fn derive_profile(
         title: "Communication".into(),
         value: comm_verdict.into(),
         detail: format!(
-            "Prompts average {:.0} words; {:.0}% are quick commands.",
+            "A typical prompt is {:.0} words (average {:.0}); {:.0}% are quick commands.",
+            communication.median_prompt_words,
             communication.avg_prompt_words,
             communication.short_command_ratio * 100.0
         ),
@@ -704,23 +741,67 @@ mod tests {
         }
     }
 
+    /// Record `n` prompts of `words` words each.
+    fn prompts_of(s: &mut Scan, counts: &[u32]) {
+        for &w in counts {
+            s.prompt.prompts += 1;
+            s.prompt.total_words += w as u64;
+            s.prompt.word_counts.push(w);
+        }
+    }
+
     #[test]
     fn communication_buckets() {
-        for (prompts, words, want) in [
-            (10u64, 80u64, "Terse commander"),   // 8.0 words
-            (10, 200, "Conversational"),         // 20.0 words
-            (10, 400, "Detailed director"),      // 40.0 words
+        for (words, want) in [
+            (8u32, "Terse commander"),
+            (20, "Conversational"),
+            (40, "Detailed director"),
         ] {
             let mut s = scan();
-            s.prompt.prompts = prompts;
-            s.prompt.total_words = words;
+            prompts_of(&mut s, &[words; 10]);
             assert_eq!(
                 verdict(&profile_of(&s), "communication"),
                 want,
-                "{} avg words misclassified",
-                words as f64 / prompts as f64
+                "{words} words/prompt misclassified"
             );
         }
+    }
+
+    #[test]
+    fn communication_ignores_paste_skew() {
+        // Regression: classification used the mean, so a few pasted logs or
+        // stack traces flipped a terse writer to "Detailed director". On real
+        // data the mean ran ~20x the median (195.5 vs 10.0).
+        let mut s = scan();
+        prompts_of(&mut s, &[5; 19]);      // 19 short prompts
+        prompts_of(&mut s, &[8000]);       // one giant paste
+        let prof = profile_of(&s);
+        assert!(
+            prof.communication.avg_prompt_words > 350.0,
+            "expected a skewed mean, got {}",
+            prof.communication.avg_prompt_words
+        );
+        assert_eq!(prof.communication.median_prompt_words, 5.0);
+        assert_eq!(verdict(&prof, "communication"), "Terse commander");
+    }
+
+    #[test]
+    fn session_length_ignores_one_long_day() {
+        // Same skew, one level up: a single marathon session used to drag the
+        // mean over the 45-minute line (real data: mean 152 vs median 26).
+        let mut s = scan();
+        for i in 0..9 {
+            session_of(&mut s, &format!("short{i}"), 10);
+        }
+        session_of(&mut s, "marathon", 600);
+        let prof = profile_of(&s);
+        assert!(
+            prof.rhythm.avg_session_minutes > 45.0,
+            "expected a skewed mean, got {}",
+            prof.rhythm.avg_session_minutes
+        );
+        assert_eq!(prof.rhythm.median_session_minutes, 10.0);
+        assert_eq!(verdict(&prof, "session"), "Sprinter");
     }
 
     #[test]
